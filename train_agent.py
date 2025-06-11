@@ -80,7 +80,7 @@ learning_rate = 0.0001/100 * rollout_size
 np.random.seed(seed)
 torch.manual_seed(seed)
 
-exptname = f"V3_{gamma}g_{reset_memory}rm_{rollout_size}bz_{tdnoise}td_{tdscale}tds_{tdlb}lb_{tdub}up_{hidden_dim}n_{n_epochs}e_{max_displacement}md_{reward_size}rz_{seed}s"
+exptname = f"V3_{gamma}g_{reset_memory}rm_{rollout_size}bz_{tdscale}tds_{hidden_dim}n_{n_epochs}e_{max_displacement}md_{reward_size}rz_{seed}s"
 print(exptname)
 model_path = None
 
