@@ -17,6 +17,7 @@ import pickle
 
 analysis = 'all'
 epochs = 1 #must adjust format of saved variables if you increase from 1
+seeds = 50 # used for confidence intervals 
 
 data_dir = "./model_params_101000/"
 save_dir_behav = "data/rnn_behav/model_params_101000/"
@@ -46,7 +47,7 @@ if analysis == 'gamma' or analysis == "all":
 
         for m, model in enumerate(models):
             
-            all_states, rnn_activity = model_rnn.test_rnn(model, epochs=epochs)
+            all_states, rnn_activity, model = model_rnn.test_rnn(model, epochs=epochs)
             all_param_states['states'].append(all_states)
 
             gamma_dict[m, g] = {"gamma", gamma}
@@ -63,7 +64,7 @@ if analysis == 'gamma' or analysis == "all":
             with open(os.path.join(save_dir_behav, "gamma_ob_list.pkl"), "wb") as f:
                 pickle.dump(gamma_ob_list, f)
 
-        
+
 
 
 if analysis == 'rollout' or analysis == 'all':
@@ -85,7 +86,7 @@ if analysis == 'rollout' or analysis == 'all':
 
         for m,model in enumerate(models):
 
-            all_states, rnn_activity = model_rnn.test_rnn(model, epochs=epochs)
+            all_states, rnn_activity, model = model_rnn.test_rnn(model, epochs=epochs)
             all_param_states['states'].append(all_states)
 
             rollout_dict[m, g] = {"rollout", rollout}
@@ -93,13 +94,13 @@ if analysis == 'rollout' or analysis == 'all':
             rollout_ob_list.append(all_states[0,1]) 
             rollout_models.append(model)  
 
-            with open(os.path.join(save_dir, "rollout_all_param_states.pkl"), "wb") as f:
+            with open(os.path.join(save_dir_behav, "rollout_all_param_states.pkl"), "wb") as f:
                 pickle.dump(all_param_states, f)
-            with open(os.path.join(save_dir, "rollout_dict.pkl"), "wb") as f:
+            with open(os.path.join(save_dir_behav, "rollout_dict.pkl"), "wb") as f:
                 pickle.dump(rollout_dict, f)
-            with open(os.path.join(save_dir, "rollout_cp_list.pkl"), "wb") as f:
+            with open(os.path.join(save_dir_behav, "rollout_cp_list.pkl"), "wb") as f:
                 pickle.dump(rollout_cp_list, f)
-            with open(os.path.join(save_dir, "rollout_ob_list.pkl"), "wb") as f:
+            with open(os.path.join(save_dir_behav, "rollout_ob_list.pkl"), "wb") as f:
                 pickle.dump(rollout_ob_list, f)
 
 # introduce variables into sampling
@@ -122,7 +123,7 @@ if analysis == 'preset' or analysis == 'all':
         print(preset, len(models))
 
         for m,model in enumerate(models):
-            all_states, rnn_activity = model_rnn.test_rnn(model, epochs=epochs)
+            all_states, rnn_activity, model = model_rnn.test_rnn(model, epochs=epochs)
             all_param_states['states'].append(all_states)
 
             preset_dict[m, g] = {"preset", preset}
@@ -130,13 +131,13 @@ if analysis == 'preset' or analysis == 'all':
             preset_ob_list.append(all_states[0,1])   
             preset_models.append(model)
 
-            with open(os.path.join(save_dir, "preset_all_param_states.pkl"), "wb") as f:
+            with open(os.path.join(save_dir_behav, "preset_all_param_states.pkl"), "wb") as f:
                 pickle.dump(all_param_states, f)
-            with open(os.path.join(save_dir, "preset_dict.pkl"), "wb") as f:
+            with open(os.path.join(save_dir_behav, "preset_dict.pkl"), "wb") as f:
                 pickle.dump(preset_dict, f)
-            with open(os.path.join(save_dir, "preset_cp_list.pkl"), "wb") as f:
+            with open(os.path.join(save_dir_behav, "preset_cp_list.pkl"), "wb") as f:
                 pickle.dump(preset_cp_list, f)
-            with open(os.path.join(save_dir, "preset_ob_list.pkl"), "wb") as f:
+            with open(os.path.join(save_dir_behav, "preset_ob_list.pkl"), "wb") as f:
                 pickle.dump(preset_ob_list, f)
 
 if analysis == 'scale' or analysis == 'all':
@@ -160,7 +161,7 @@ if analysis == 'scale' or analysis == 'all':
 
 
         for m,model in enumerate(models):
-            all_states, rnn_activity = model_rnn.test_rnn(model, epochs=epochs)
+            all_states, rnn_activity, model = model_rnn.test_rnn(model, epochs=epochs)
             all_param_states['states'].append(all_states)
 
             scale_dict[m, g] = {"scale", scale}
@@ -168,13 +169,13 @@ if analysis == 'scale' or analysis == 'all':
             scale_ob_list.append(all_states[0,1])   
             scale_models.append(model)
 
-            with open(os.path.join(save_dir, "scale_all_param_states.pkl"), "wb") as f:
+            with open(os.path.join(save_dir_behav, "scale_all_param_states.pkl"), "wb") as f:
                 pickle.dump(all_param_states, f)
-            with open(os.path.join(save_dir, "scale_dict.pkl"), "wb") as f:
+            with open(os.path.join(save_dir_behav, "scale_dict.pkl"), "wb") as f:
                 pickle.dump(scale_dict, f)
-            with open(os.path.join(save_dir, "scale_cp_list.pkl"), "wb") as f:
+            with open(os.path.join(save_dir_behav, "scale_cp_list.pkl"), "wb") as f:
                 pickle.dump(scale_cp_list, f)
-            with open(os.path.join(save_dir, "scale_ob_list.pkl"), "wb") as f:
+            with open(os.path.join(save_dir_behav, "scale_ob_list.pkl"), "wb") as f:
                 pickle.dump(scale_ob_list, f)
 
 #combined_dict doesn't work because of overlapping keys
@@ -184,11 +185,11 @@ if analysis == 'all':
     ob_array  = [gamma_ob_list, rollout_ob_list, preset_ob_list, scale_ob_list]
     mod_array = [gamma_models, rollout_models, preset_models, scale_models]
 
-    with open(os.path.join(save_dir, "combined_cp_array_filtered.pkl"), "wb") as f:
+    with open(os.path.join(save_dir_behav, "combined_cp_array_filtered.pkl"), "wb") as f:
         pickle.dump(cp_array, f)
-    with open(os.path.join(save_dir, "combined_ob_array_filtered.pkl"), "wb") as f:
+    with open(os.path.join(save_dir_behav, "combined_ob_array_filtered.pkl"), "wb") as f:
         pickle.dump(ob_array, f)
 
-    with open(os.path.join(save_dir, "combined_mod_array_filtered.pkl"), "wb") as f:
+    with open(os.path.join(save_dir_behav, "combined_mod_array_filtered.pkl"), "wb") as f:
         pickle.dump(mod_array, f)
         

@@ -76,16 +76,17 @@ def rnn_predict(
     Hs, As, Cs, Rs, Os = [], [], [], [], []
     Hs_all, Os_all = [], []
 
-    all_states = np.zeros([epochs, 2, 5, trials])
-    rnn_activity = np.zeros([epochs, 2], dtype=object)
+    all_states = np.zeros([epochs, len(contexts), 5, trials])
+    rnn_activity = np.zeros([epochs, len(contexts)], dtype=object)
 
     for epoch in range(epochs):
+        Hs = []; As = []; Cs = []; Rs = []; Os = []
         for tt, context in enumerate(contexts):
             env = PIE_CP_OB_v2(condition=context, 
                                max_time=300, 
                                total_trials=trials, 
                                train_cond=False, max_displacement=10, 
-                               reward_size=2)
+                               reward_size=5)
 
             h, a, c, r, o = [],[],[], [], []
             hx = torch.randn(1, 1, hidden_dim) * 1 / hidden_dim**0.5
@@ -118,11 +119,14 @@ def rnn_predict(
                     next_state = np.concatenate([norm_next_obs, env.context, np.array([reward])])
                     next_state = torch.FloatTensor(next_state).unsqueeze(0).unsqueeze(0)
 
-            # Hs.append(h), As.append(a), Cs.append(c), Rs.append(r), Os.append(o)
+            
+            Hs.append(h), As.append(a), Cs.append(c), Rs.append(r), Os.append(o)
             Hs_all.append(torch.stack(h))
             Os_all.append(torch.tensor(o))
 
             rnn_activity[epoch, tt] = (h, a, c, r, o)
             all_states[epoch, tt] = np.array([env.trials, env.bucket_positions, env.bag_positions, env.helicopter_positions, env.hazard_triggers])
+        
+    hidden_states_all = [torch.vstack(h).detach().unsqueeze(0).numpy() for h in Hs_all]
 
-    return all_states, rnn_activity
+    return all_states, hidden_states_all, model

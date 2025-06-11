@@ -91,73 +91,74 @@ def find_fixed_points(model, hidden_states, load_from_file = True, model_name=''
         stable_unstable_fps[context] = np.array([stable_fp_cnt, unstable_fp_cnt, stable_fp_cnt+unstable_fp_cnt])
     return stable_unstable_fps
 
+# integrated this into rnn_predict in model_rnn.py (one function for both behav and rnn activity)
+# def get_states_hs(model_path,reset_memory=0.0):
+#     model = ActorCritic(input_dim, hidden_dim, action_dim)
+#     model.load_state_dict(torch.load(model_path))
+#     print('Load Model')
+#     all_states = np.zeros([epochs, num_contexts, 5, n_trials])
+#     Hs_all = [[],[]]
+#     Os_all = [[],[]]
+#     # get rnn, actor, critic activity
+#     for epoch in range(epochs):
+#         Hs = []
+#         As = []
+#         Cs = []
+#         Rs = []
+#         Os = []
+#         for tt, context in enumerate(contexts):
+#             env = PIE_CP_OB_v2(condition=context, max_time=max_time, total_trials=n_trials,
+#                             train_cond=train_cond, max_displacement=max_displacement, reward_size=reward_size)
 
-def get_states_hs(model_path,reset_memory=0.0):
-    model = ActorCritic(input_dim, hidden_dim, action_dim)
-    model.load_state_dict(torch.load(model_path))
-    print('Load Model')
-    all_states = np.zeros([epochs, num_contexts, 5, n_trials])
-    Hs_all = [[],[]]
-    Os_all = [[],[]]
-    # get rnn, actor, critic activity
-    for epoch in range(epochs):
-        Hs = []
-        As = []
-        Cs = []
-        Rs = []
-        Os = []
-        for tt, context in enumerate(contexts):
-            env = PIE_CP_OB_v2(condition=context, max_time=max_time, total_trials=n_trials,
-                            train_cond=train_cond, max_displacement=max_displacement, reward_size=reward_size)
+#             h, a, c, r, o = [], [], [], [], []
+#             hx = torch.randn(1, 1, hidden_dim) * 1/hidden_dim**0.5 
+#             for trial in range(n_trials):
 
-            h, a, c, r, o = [], [], [], [], []
-            hx = torch.randn(1, 1, hidden_dim) * 1/hidden_dim**0.5 
-            for trial in range(n_trials):
+#                 next_obs, done = env.reset()
+#                 norm_next_obs = env.normalize_states(next_obs)
+#                 next_state = np.concatenate([norm_next_obs, env.context, np.array([0.0])])
+#                 next_state = torch.FloatTensor(next_state).unsqueeze(0).unsqueeze(0)
 
-                next_obs, done = env.reset()
-                norm_next_obs = env.normalize_states(next_obs)
-                next_state = np.concatenate([norm_next_obs, env.context, np.array([0.0])])
-                next_state = torch.FloatTensor(next_state).unsqueeze(0).unsqueeze(0)
-
-                while not done:
-                    if np.random.random_sample()< reset_memory:
-                        hx = (torch.randn(1, 1, hidden_dim) * 1/hidden_dim**0.5)
+#                 while not done:
+#                     if np.random.random_sample()< reset_memory:
+#                         hx = (torch.randn(1, 1, hidden_dim) * 1/hidden_dim**0.5)
                 
-                    actor_logits, critic_value, hx = model(next_state, hx)
-                    probs = Categorical(logits=actor_logits)
-                    action = probs.sample()
+#                     actor_logits, critic_value, hx = model(next_state, hx)
+#                     probs = Categorical(logits=actor_logits)
+#                     action = probs.sample()
 
-                    # Take action and observe reward
-                    next_obs, reward, done = env.step(action.item())
+#                     # Take action and observe reward
+#                     next_obs, reward, done = env.step(action.item())
 
-                    h.append(hx[0, 0]), a.append(actor_logits[0]), c.append(critic_value[0]), r.append(reward), o.append(
-                        env.hazard_trigger)
+#                     h.append(hx[0, 0]), a.append(actor_logits[0]), c.append(critic_value[0]), r.append(reward), o.append(
+#                         env.hazard_trigger)
 
-                    # Prep next state
-                    norm_next_obs = env.normalize_states(next_obs)
-                    next_state = np.concatenate([norm_next_obs, env.context, np.array([reward])])
-                    next_state = torch.FloatTensor(next_state).unsqueeze(0).unsqueeze(0)
+#                     # Prep next state
+#                     norm_next_obs = env.normalize_states(next_obs)
+#                     next_state = np.concatenate([norm_next_obs, env.context, np.array([reward])])
+#                     next_state = torch.FloatTensor(next_state).unsqueeze(0).unsqueeze(0)
 
-            Hs.append(h), As.append(a), Cs.append(c), Rs.append(r), Os.append(o)
-            Hs_all[tt].append(torch.stack(h))
-            Os_all[tt].append(torch.tensor(o))
+#             Hs.append(h), As.append(a), Cs.append(c), Rs.append(r), Os.append(o)
+#             Hs_all[tt].append(torch.stack(h))
+#             Os_all[tt].append(torch.tensor(o))
 
-            all_states[epoch, tt] = np.array(
-                [env.trials, env.bucket_positions, env.bag_positions, env.helicopter_positions, env.hazard_triggers])
-    hidden_states_all = [torch.vstack(h).detach().unsqueeze(0).numpy() for h in Hs_all]
-    return hidden_states_all, model
+#             all_states[epoch, tt] = np.array(
+#                 [env.trials, env.bucket_positions, env.bag_positions, env.helicopter_positions, env.hazard_triggers])
+#     hidden_states_all = [torch.vstack(h).detach().unsqueeze(0).numpy() for h in Hs_all]
+#     return hidden_states_all, model
 
-def get_mean_ci(x, valididx):
-    m = []
-    s = []
-    numparams = x.shape[0]
-    for p in range(numparams):
-        idx = int(valididx[p])
-        m.append(np.mean(x[p,:idx],axis=0))
-        s.append(np.std(x[p,:idx],axis=0)/np.sqrt(idx))
-    m = np.array(m)
-    s = np.array(s)
-    return m, s
+# placed into utils_funcs.py
+# def get_mean_ci(x, valididx):
+#     m = []
+#     s = []
+#     numparams = x.shape[0]
+#     for p in range(numparams):
+#         idx = int(valididx[p])
+#         m.append(np.mean(x[p,:idx],axis=0))
+#         s.append(np.std(x[p,:idx],axis=0)/np.sqrt(idx))
+#     m = np.array(m)
+#     s = np.array(s)
+#     return m, s
 
 def plot_param_fps(param, fps, xlabel, validms, logx=False, legend=False):
 
