@@ -16,12 +16,13 @@ import pickle
 
 
 analysis = 'all'
-epochs = 30 #must adjust format of saved variables if you increase from 1
+epochs = 1 #must adjust format of saved variables if you increase from 1
 
 data_dir = "./model_params_101000/"
-save_dir = "data/rnn_behav/model_params_101000/30epochs/"
-os.makedirs(save_dir, exist_ok=True)
-bias = False
+save_dir_behav = "data/rnn_behav/model_params_101000/"
+save_dir_rnn = "data/rnn_activity/model_params_101000/"
+os.makedirs(save_dir_behav, exist_ok=True)
+os.makedirs(save_dir_rnn, exist_ok=True)
 
 
 if analysis == 'gamma' or analysis == "all":
@@ -53,14 +54,16 @@ if analysis == 'gamma' or analysis == "all":
             gamma_ob_list.append(all_states[0,1])   
             gamma_models.append(model)
 
-            with open(os.path.join(save_dir, "gamma_all_param_states.pkl"), "wb") as f:
+            with open(os.path.join(save_dir_behav, "gamma_all_param_states.pkl"), "wb") as f:
                 pickle.dump(all_param_states, f)
-            with open(os.path.join(save_dir, "gamma_dict.pkl"), "wb") as f:
+            with open(os.path.join(save_dir_behav, "gamma_dict.pkl"), "wb") as f:
                 pickle.dump(gamma_dict, f)
-            with open(os.path.join(save_dir, "gamma_cp_list.pkl"), "wb") as f:
+            with open(os.path.join(save_dir_behav, "gamma_cp_list.pkl"), "wb") as f:
                 pickle.dump(gamma_cp_list, f)
-            with open(os.path.join(save_dir, "gamma_ob_list.pkl"), "wb") as f:
+            with open(os.path.join(save_dir_behav, "gamma_ob_list.pkl"), "wb") as f:
                 pickle.dump(gamma_ob_list, f)
+
+        
 
 
 if analysis == 'rollout' or analysis == 'all':

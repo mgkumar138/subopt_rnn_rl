@@ -70,6 +70,17 @@ def plot_behavior(states, context,epoch, ax=None):
     plt.title(f"{context}, E:{epoch}")
     plt.legend(fontsize=6)
 
+def get_mean_ci(x, valididx):
+    m = []
+    s = []
+    numparams = x.shape[0]
+    for p in range(numparams):
+        idx = int(valididx[p])
+        m.append(np.mean(x[p,:idx],axis=0))
+        s.append(np.std(x[p,:idx],axis=0)/np.sqrt(idx))
+    m = np.array(m)
+    s = np.array(s)
+    return m, s
 
 
 
