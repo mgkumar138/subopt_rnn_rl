@@ -18,9 +18,9 @@ parser.add_argument('--ratio', type=float, required=False, help='train_eval_rati
 
 # 4 different hyperparameters
 parser.add_argument('--gamma', type=float, required=False, help='reward discount factor', default=0.95)
-parser.add_argument('--rollsz', type=int, required=False, help='rollout buffer size', default=100)
-parser.add_argument('--presetmem', type=float, required=False, help='probability of resetting memory with noise', default=0.0)
-parser.add_argument('--tdscale', type=float, required=False, help='scale TD error magnitude', default=1.0)
+parser.add_argument('--tau', type=int, required=False, help='rollout buffer size', default=100)
+parser.add_argument('--p_reset', type=float, required=False, help='probability of resetting memory with noise', default=0.0)
+parser.add_argument('--beta_delta', type=float, required=False, help='scale TD error magnitude', default=1.0)
 
 args, unknown = parser.parse_known_args()
 print(args)
@@ -70,9 +70,9 @@ seed = args.seed
 
 # hyperparameters
 gamma = args.gamma
-rollout_size = args.rollsz
-reset_memory = args.presetmem  # reset RNN activity after T trials
-tdscale = args.tdscale
+rollout_size = args.tau
+reset_memory = args.p_reset  # reset RNN activity after T trials
+tdscale = args.beta_delta
 
 # reduce learning rate if smaller rollout size, else model overfits to short trajectories
 learning_rate = 0.0001/100 * rollout_size 
