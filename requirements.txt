@@ -1,5 +1,6 @@
-gym
-matplotlib
-numpy
-scipy
-torch
+gym==0.26.2
+matplotlib==3.10.3
+numpy==2.3.0
+scikit_learn==1.7.0
+scipy==1.15.3
+torch==2.7.1
