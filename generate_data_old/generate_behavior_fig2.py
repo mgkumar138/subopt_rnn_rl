@@ -65,56 +65,56 @@ from utils_funcs import saveload
 #     return area, pess, lrss
 
 # see src/model_rnn.py
-# def get_area(model_path, epochs=100, reset_memory=0.0):
-#     hidden_dim = 64
-#     trials = 200
+def get_area(model_path, epochs=100, reset_memory=0.0):
+    hidden_dim = 64
+    trials = 200
 
-#     model = ActorCritic(9, hidden_dim, 3)
-#     model.load_state_dict(torch.load(model_path))
+    model = ActorCritic(9, hidden_dim, 3)
+    model.load_state_dict(torch.load(model_path))
 
-#     # print(f'Load Model {model_path}')
-#     contexts = ["change-point","oddball"] #"change-point","oddball"
+    # print(f'Load Model {model_path}')
+    contexts = ["change-point","oddball"] #"change-point","oddball"
 
-#     all_states = np.zeros([epochs, 2, 5, trials])
-#     for epoch in range(epochs):
-#         for tt, context in enumerate(contexts):
-#             env = PIE_CP_OB_v2(condition=context, max_time=300, total_trials=trials, 
-#                     train_cond=False, max_displacement=10, reward_size=2)
+    all_states = np.zeros([epochs, 2, 5, trials])
+    for epoch in range(epochs):
+        for tt, context in enumerate(contexts):
+            env = PIE_CP_OB_v2(condition=context, max_time=300, total_trials=trials, 
+                    train_cond=False, max_displacement=10, reward_size=2)
             
-#             hx = torch.randn(1, 1, hidden_dim) * 1/hidden_dim**0.5
-#             for trial in range(trials):
+            hx = torch.randn(1, 1, hidden_dim) * 1/hidden_dim**0.5
+            for trial in range(trials):
 
-#                 next_obs, done = env.reset()
-#                 norm_next_obs = env.normalize_states(next_obs)
-#                 next_state = np.concatenate([norm_next_obs, env.context, np.array([0.0])])
-#                 next_state = torch.FloatTensor(next_state).unsqueeze(0).unsqueeze(0)
+                next_obs, done = env.reset()
+                norm_next_obs = env.normalize_states(next_obs)
+                next_state = np.concatenate([norm_next_obs, env.context, np.array([0.0])])
+                next_state = torch.FloatTensor(next_state).unsqueeze(0).unsqueeze(0)
 
-#                 hx = hx.detach()
-#                 # if trial_counter % reset_memory == 0:
-#                 # if np.random.random_sample()< reset_memory:
-#                 #     hx += (torch.randn(1, 1, hidden_dim) * 1/hidden_dim**0.5)
+                hx = hx.detach()
+                # if trial_counter % reset_memory == 0:
+                # if np.random.random_sample()< reset_memory:
+                #     hx += (torch.randn(1, 1, hidden_dim) * 1/hidden_dim**0.5)
 
-#                 while not done:
+                while not done:
 
-#                     if np.random.random_sample()< reset_memory:
-#                         hx = (torch.randn(1, 1, hidden_dim) * 1/hidden_dim**0.5)
+                    if np.random.random_sample()< reset_memory:
+                        hx = (torch.randn(1, 1, hidden_dim) * 1/hidden_dim**0.5)
 
-#                     actor_logits, critic_value, hx = model(next_state, hx)
-#                     probs = Categorical(logits=actor_logits)
-#                     action = probs.sample()
+                    actor_logits, critic_value, hx = model(next_state, hx)
+                    probs = Categorical(logits=actor_logits)
+                    action = probs.sample()
 
-#                     # Take action and observe reward
-#                     next_obs, reward, done = env.step(action.item())
+                    # Take action and observe reward
+                    next_obs, reward, done = env.step(action.item())
 
-#                     # Prep next state
-#                     norm_next_obs = env.normalize_states(next_obs)
-#                     next_state = np.concatenate([norm_next_obs, env.context, np.array([reward])])
-#                     next_state = torch.FloatTensor(next_state).unsqueeze(0).unsqueeze(0)
+                    # Prep next state
+                    norm_next_obs = env.normalize_states(next_obs)
+                    next_state = np.concatenate([norm_next_obs, env.context, np.array([reward])])
+                    next_state = torch.FloatTensor(next_state).unsqueeze(0).unsqueeze(0)
 
-#             all_states[epoch, tt] = np.array([env.trials, env.bucket_positions, env.bag_positions, env.helicopter_positions, env.hazard_triggers])
+            all_states[epoch, tt] = np.array([env.trials, env.bucket_positions, env.bag_positions, env.helicopter_positions, env.hazard_triggers])
 
-#     areas, pess, lrss = get_lrs(all_states)
-#     return np.array(areas)
+    areas, pess, lrss = get_lrs(all_states)
+    return np.array(areas)
 
 #added to utils_funcs.py
 # def get_mean_ci(x, valididx):

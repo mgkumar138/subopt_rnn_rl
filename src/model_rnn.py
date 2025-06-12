@@ -97,7 +97,9 @@ def rnn_predict(
                 next_state = np.concatenate([norm_next_obs, env.context, np.array([0.0])])
                 next_state = torch.FloatTensor(next_state).unsqueeze(0).unsqueeze(0)
 
-                hx = hx.detach()
+                # not sure if needed as not in generate_rnn_fp_fig4
+                #but is in generate_behavior.fig2
+                # hx = hx.detach()
 
                 while not done:
                     

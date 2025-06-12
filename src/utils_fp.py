@@ -127,13 +127,6 @@ def find_fixed_points_v2(model, hidden_states, context=0, separate_traj = None, 
         
     return stable_fp_cnt, unstable_fp_cnt, unique_fps, state_traj, fig
 
-
-
-
-
-
-
-
 def make_eigenvalue_plot(W):
     plt.figure(dpi=150, figsize=(2.5, 2.5))
     t = np.linspace(0, np.pi * 2, 100)
