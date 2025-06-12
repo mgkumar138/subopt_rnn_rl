@@ -14,6 +14,8 @@ import model_rnn
 import os
 import pickle
 
+import utils_funcs, utils_fp, model_rnn, tasks
+
 
 analysis = 'all'
 epochs = 1 #must adjust format of saved variables if you increase from 1
@@ -31,6 +33,8 @@ if analysis == 'gamma' or analysis == "all":
 
     gammas = [0.99, 0.95, 0.9, 0.8, 0.7, 0.5, 0.25, 0.1] # 0.99,0.95, 0.9,0.8,0.7, 0.5, 0.25, 0.1
     all_param_states = {'gammas':gammas,'states':[]}
+    fps = np.zeros([len(gammas),seeds, len(contexts), 3])
+
 
     gamma_dict = {}
     gamma_cp_list = [] 
@@ -46,8 +50,9 @@ if analysis == 'gamma' or analysis == "all":
         print(gamma, len(models))
 
         for m, model in enumerate(models):
-            
             all_states, rnn_activity, model = model_rnn.test_rnn(model, epochs=epochs)
+            fps[g, m] = utils_fp.find_fixed_points(model, rnn_activity)
+
             all_param_states['states'].append(all_states)
 
             gamma_dict[m, g] = {"gamma", gamma}
@@ -64,7 +69,9 @@ if analysis == 'gamma' or analysis == "all":
             with open(os.path.join(save_dir_behav, "gamma_ob_list.pkl"), "wb") as f:
                 pickle.dump(gamma_ob_list, f)
 
+            #add saving of rnn_activity
 
+            #add saving of fps
 
 
 if analysis == 'rollout' or analysis == 'all':

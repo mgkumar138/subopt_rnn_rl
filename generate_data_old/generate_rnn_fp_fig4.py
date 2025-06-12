@@ -37,59 +37,59 @@ seed = 2025
 np.random.seed(seed)
 torch.manual_seed(seed)
 
+# moved to utils_fp.py
+# def find_fixed_points(model, hidden_states, load_from_file = True, model_name=''):
+#     stable_unstable_fps = np.zeros([len(contexts),3])
+#     for context, context_name in enumerate(contexts):
 
-def find_fixed_points(model, hidden_states, load_from_file = True, model_name=''):
-    stable_unstable_fps = np.zeros([len(contexts),3])
-    for context, context_name in enumerate(contexts):
+#         NOISE_SCALE = 0.5  # Standard deviation of noise added to initial states
 
-        NOISE_SCALE = 0.5  # Standard deviation of noise added to initial states
+#         '''Fixed point finder hyperparameters. See FixedPointFinder.py for detailed
+#         descriptions of available hyperparameters.'''
+#         fpf_hps = {
+#             'max_iters': 10000,
+#             'lr_init': 1.,
+#             'outlier_distance_scale': 10.0,
+#             'verbose': False,
+#             'super_verbose': False}
 
-        '''Fixed point finder hyperparameters. See FixedPointFinder.py for detailed
-        descriptions of available hyperparameters.'''
-        fpf_hps = {
-            'max_iters': 10000,
-            'lr_init': 1.,
-            'outlier_distance_scale': 10.0,
-            'verbose': False,
-            'super_verbose': False}
+#         # Setup the fixed point finder
+#         fpf = FixedPointFinderTorch(model.rnn, **fpf_hps)
 
-        # Setup the fixed point finder
-        fpf = FixedPointFinderTorch(model.rnn, **fpf_hps)
+#         initial_states = fpf.sample_states(hidden_states[context],
+#         	n_inits=N_INITS,
+#         	noise_scale=NOISE_SCALE)
 
-        initial_states = fpf.sample_states(hidden_states[context],
-        	n_inits=N_INITS,
-        	noise_scale=NOISE_SCALE)
+#         # Study the system in the absence of input pulses (e.g., all inputs are 0 except the context cue)
+#         inputs = np.zeros((1, model.input_dim))
+#         inputs[:, -3+context] = 1.0
 
-        # Study the system in the absence of input pulses (e.g., all inputs are 0 except the context cue)
-        inputs = np.zeros((1, model.input_dim))
-        inputs[:, -3+context] = 1.0
+#         # Run the fixed point finder
+#         unique_fps, all_fps = fpf.find_fixed_points(initial_states, inputs)
 
-        # Run the fixed point finder
-        unique_fps, all_fps = fpf.find_fixed_points(initial_states, inputs)
+#         # fp_fname = './saved_fp/unique_fps_context_{}_model_{}.pk'.format(context, model_name)
+#         # if os.path.exists(fp_fname) and load_from_file:
+#         #     with open(fp_fname, 'rb') as f:
+#         #         unique_fps = pk.load(f)
+#         # else:
+#         #     unique_fps, all_fps = fpf.find_fixed_points(noisy_state_traj[0].copy(), inputs)
+#         #     with open(fp_fname, 'wb') as f:
+#         #         pk.dump(unique_fps, f)
 
-        # fp_fname = './saved_fp/unique_fps_context_{}_model_{}.pk'.format(context, model_name)
-        # if os.path.exists(fp_fname) and load_from_file:
-        #     with open(fp_fname, 'rb') as f:
-        #         unique_fps = pk.load(f)
-        # else:
-        #     unique_fps, all_fps = fpf.find_fixed_points(noisy_state_traj[0].copy(), inputs)
-        #     with open(fp_fname, 'wb') as f:
-        #         pk.dump(unique_fps, f)
+#         # Visualize identified fixed points with overlaid RNN state trajectories
+#         # All visualized in the 3D PCA space fit the the example RNN states.
+#         stable_fp_cnt = 0
+#         unstable_fp_cnt = 0
+#         for i, fp in enumerate(unique_fps):
+#             e_vals = fp.eigval_J_xstar[0]
+#             is_stable = np.all(np.abs(e_vals) < 1.0)
+#             if is_stable:
+#                 stable_fp_cnt += 1
+#             else:
+#                 unstable_fp_cnt += 1
 
-        # Visualize identified fixed points with overlaid RNN state trajectories
-        # All visualized in the 3D PCA space fit the the example RNN states.
-        stable_fp_cnt = 0
-        unstable_fp_cnt = 0
-        for i, fp in enumerate(unique_fps):
-            e_vals = fp.eigval_J_xstar[0]
-            is_stable = np.all(np.abs(e_vals) < 1.0)
-            if is_stable:
-                stable_fp_cnt += 1
-            else:
-                unstable_fp_cnt += 1
-
-        stable_unstable_fps[context] = np.array([stable_fp_cnt, unstable_fp_cnt, stable_fp_cnt+unstable_fp_cnt])
-    return stable_unstable_fps
+#         stable_unstable_fps[context] = np.array([stable_fp_cnt, unstable_fp_cnt, stable_fp_cnt+unstable_fp_cnt])
+#     return stable_unstable_fps
 
 # integrated this into rnn_predict in model_rnn.py (one function for both behav and rnn activity)
 # def get_states_hs(model_path,reset_memory=0.0):
@@ -160,44 +160,45 @@ def find_fixed_points(model, hidden_states, load_from_file = True, model_name=''
 #     s = np.array(s)
 #     return m, s
 
-def plot_param_fps(param, fps, xlabel, validms, logx=False, legend=False):
+#placed into main_fp for fig 5
+# def plot_param_fps(param, fps, xlabel, validms, logx=False, legend=False):
 
-    saveload(f'./analysis/{xlabel}_fps_{N_INITS}',[param, fps, validms], 'save')
+#     saveload(f'./analysis/{xlabel}_fps_{N_INITS}',[param, fps, validms], 'save')
 
-    labels = ['CP', 'OB']
-    colors= ['orange', 'brown']
-    markers = ['o','x','v']
-    markers=[None, None, None]
-    titles= ['Stable FPs', 'Unstable FPs', 'All FPs']
-    f,axs = plt.subplots(3,1,figsize=(3.5,2*3))
+#     labels = ['CP', 'OB']
+#     colors= ['orange', 'brown']
+#     markers = ['o','x','v']
+#     markers=[None, None, None]
+#     titles= ['Stable FPs', 'Unstable FPs', 'All FPs']
+#     f,axs = plt.subplots(3,1,figsize=(3.5,2*3))
 
-    for i in range(3):
+#     for i in range(3):
 
-        for c in range(2):
-            m,s = get_mean_ci(fps[:,:,c],validms)
+#         for c in range(2):
+#             m,s = get_mean_ci(fps[:,:,c],validms)
 
-            axs[i].plot(param, m[:,i], label=labels[c], color=colors[c], marker=markers[i])
-            axs[i].fill_between(x=param, y1=m[:,i]-s[:,i], y2=m[:,i]+s[:,i], alpha=0.2, color=colors[c])
+#             axs[i].plot(param, m[:,i], label=labels[c], color=colors[c], marker=markers[i])
+#             axs[i].fill_between(x=param, y1=m[:,i]-s[:,i], y2=m[:,i]+s[:,i], alpha=0.2, color=colors[c])
         
-        axs[i].set_ylabel(titles[i])
+#         axs[i].set_ylabel(titles[i])
 
-        ax2 = axs[i].twinx()
-        dffps = fps[:,:,0,i] - fps[:,:,1,i]
-        m,s = get_mean_ci(dffps,validms)
-        axs[i].plot([], [], label='CP-OB', color='k', marker=markers[i])
-        # axs[i].plot(param, m, label='CP-OB', color='k', marker=markers[i])
-        # axs[i].fill_between(x=param, y1=m-s, y2=m+s, alpha=0.2, color='k')
+#         ax2 = axs[i].twinx()
+#         dffps = fps[:,:,0,i] - fps[:,:,1,i]
+#         m,s = get_mean_ci(dffps,validms)
+#         axs[i].plot([], [], label='CP-OB', color='k', marker=markers[i])
+#         # axs[i].plot(param, m, label='CP-OB', color='k', marker=markers[i])
+#         # axs[i].fill_between(x=param, y1=m-s, y2=m+s, alpha=0.2, color='k')
 
 
-        ax2.plot(param, m, label='CP-OB', color='k', marker=markers[i])
-        ax2.fill_between(x=param, y1=m-s, y2=m+s, alpha=0.2, color='k')
-        ax2.set_ylabel('$\Delta$ FPs')
+#         ax2.plot(param, m, label='CP-OB', color='k', marker=markers[i])
+#         ax2.fill_between(x=param, y1=m-s, y2=m+s, alpha=0.2, color='k')
+#         ax2.set_ylabel('$\Delta$ FPs')
 
-    axs[-1].legend(fontsize=8)
-    axs[-1].set_xlabel(xlabel)
-    f.tight_layout()
-    f.savefig(f'./analysis/{xlabel}_fp_{n_trials*epochs}.png')
-    f.savefig(f'./analysis/{xlabel}_fp_{n_trials*epochs}.svg')
+#     axs[-1].legend(fontsize=8)
+#     axs[-1].set_xlabel(xlabel)
+#     f.tight_layout()
+#     f.savefig(f'./analysis/{xlabel}_fp_{n_trials*epochs}.png')
+#     f.savefig(f'./analysis/{xlabel}_fp_{n_trials*epochs}.svg')
 
 
 # Call the combined function with hidden states, rewards, hazard indications, and contexts
@@ -210,97 +211,99 @@ def plot_param_fps(param, fps, xlabel, validms, logx=False, legend=False):
 # print(stable_unstable_fps)
 
 #%%
-analysis = 'gamma'
-data_dir = "./model_params_101000/"
-seeds = 50
 
-if analysis == 'gamma':
+#integrating find_fixed_points and seeds into sample_behavior.py
+# analysis = 'gamma'
+# data_dir = "./model_params_101000/"
+# seeds = 50
 
-    gammas = [0.99,0.95, 0.9,0.8,0.7, 0.5, 0.25, 0.1] 
-    fps = np.zeros([len(gammas),seeds, len(contexts), 3])
-    validms = np.zeros(len(gammas), dtype=int)
+# if analysis == 'gamma':
 
-    for g, gamma in enumerate(gammas):
-        file_names= data_dir+f"*_V3_{gamma}g_0.0rm_100bz_0.0td_1.0tds_Nonelb_Noneup_64n_50000e_10md_5.0rz_*s.pth"
-        model_paths = glob.glob(file_names)
-        validms[g] = len(model_paths)
-        print(gamma, validms[g])
+#     gammas = [0.99,0.95, 0.9,0.8,0.7, 0.5, 0.25, 0.1] 
+#     fps = np.zeros([len(gammas),seeds, len(contexts), 3])
+#     validms = np.zeros(len(gammas), dtype=int)
 
-        for m,model_path in enumerate(model_paths):
+#     for g, gamma in enumerate(gammas):
+#         file_names= data_dir+f"*_V3_{gamma}g_0.0rm_100bz_0.0td_1.0tds_Nonelb_Noneup_64n_50000e_10md_5.0rz_*s.pth"
+#         model_paths = glob.glob(file_names)
+#         validms[g] = len(model_paths)
+#         print(gamma, validms[g])
+
+#         for m,model_path in enumerate(model_paths):
                 
-            hidden_states_all, model = get_states_hs(model_path)
-            fps[g, m] = find_fixed_points(model, hidden_states_all)
+#             hidden_states_all, model = get_states_hs(model_path)
+#             fps[g, m] = find_fixed_points(model, hidden_states_all)
 
-        print(gamma, np.mean(fps[g,:m],axis=0))
+#         print(gamma, np.mean(fps[g,:m],axis=0))
 
-    plot_param_fps(gammas, fps, '$\gamma$', validms)
+#     plot_param_fps(gammas, fps, '$\gamma$', validms)
 
 
-if analysis == 'rollout':
+# if analysis == 'rollout':
 
-    rollouts = [5, 10,20, 30, 40, 50, 75, 100, 150, 200] # 0.99,0.95, 0.9,0.8,0.7, 0.5, 0.25, 0.1
-    fps = np.zeros([len(rollouts),seeds, len(contexts), 3])
-    validms = np.zeros(len(rollouts), dtype=int)
+#     rollouts = [5, 10,20, 30, 40, 50, 75, 100, 150, 200] # 0.99,0.95, 0.9,0.8,0.7, 0.5, 0.25, 0.1
+#     fps = np.zeros([len(rollouts),seeds, len(contexts), 3])
+#     validms = np.zeros(len(rollouts), dtype=int)
 
-    for g, rollout in enumerate(rollouts):
+#     for g, rollout in enumerate(rollouts):
         
-        file_names= data_dir+f"*_V3_0.95g_0.0rm_{rollout}bz_0.0td_1.0tds_Nonelb_Noneup_64n_50000e_10md_5.0rz_*s.pth"
-        model_paths = glob.glob(file_names)
-        validms[g] = len(model_paths)
-        print(rollout, validms[g])
+#         file_names= data_dir+f"*_V3_0.95g_0.0rm_{rollout}bz_0.0td_1.0tds_Nonelb_Noneup_64n_50000e_10md_5.0rz_*s.pth"
+#         model_paths = glob.glob(file_names)
+#         validms[g] = len(model_paths)
+#         print(rollout, validms[g])
 
-        for m,model_path in enumerate(model_paths):
+#         for m,model_path in enumerate(model_paths):
                 
-            hidden_states_all, model = get_states_hs(model_path)
-            fps[g, m] = find_fixed_points(model, hidden_states_all)
+#             hidden_states_all, model = get_states_hs(model_path)
+#             fps[g, m] = find_fixed_points(model, hidden_states_all)
 
-        print(rollout, np.mean(fps[g,:m],axis=0))
+#         print(rollout, np.mean(fps[g,:m],axis=0))
 
-    plot_param_fps(rollouts, fps,  '$\\tau$', validms)
+#     plot_param_fps(rollouts, fps,  '$\\tau$', validms)
 
-if analysis == 'preset':
+# if analysis == 'preset':
 
-    presets = [0.0,0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 1.0]  # 0.99,0.95, 0.9,0.8,0.7, 0.5, 0.25, 0.1
-    fps = np.zeros([len(presets),seeds, len(contexts), 3])
-    validms = np.zeros(len(presets), dtype=int)
+#     presets = [0.0,0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 1.0]  # 0.99,0.95, 0.9,0.8,0.7, 0.5, 0.25, 0.1
+#     fps = np.zeros([len(presets),seeds, len(contexts), 3])
+#     validms = np.zeros(len(presets), dtype=int)
 
-    for g, preset in enumerate(presets):
+#     for g, preset in enumerate(presets):
         
-        file_names = data_dir+f"*_V3_0.95g_{preset}rm_100bz_0.0td_1.0tds_Nonelb_Noneup_64n_50000e_10md_5.0rz_*s.pth"
-        model_paths = glob.glob(file_names)
-        validms[g] = len(model_paths)
-        print(preset, validms[g])
+#         file_names = data_dir+f"*_V3_0.95g_{preset}rm_100bz_0.0td_1.0tds_Nonelb_Noneup_64n_50000e_10md_5.0rz_*s.pth"
+#         model_paths = glob.glob(file_names)
+#         validms[g] = len(model_paths)
+#         print(preset, validms[g])
 
-        for m,model_path in enumerate(model_paths):
+#         for m,model_path in enumerate(model_paths):
                 
-            hidden_states_all, model = get_states_hs(model_path, reset_memory=preset)
-            fps[g, m] = find_fixed_points(model, hidden_states_all)
+#             hidden_states_all, model = get_states_hs(model_path, reset_memory=preset)
+#             fps[g, m] = find_fixed_points(model, hidden_states_all)
 
-        print(preset, np.mean(fps[g,:m],axis=0))
+#         print(preset, np.mean(fps[g,:m],axis=0))
 
-    plot_param_fps(presets, fps,  '$p_{reset}$', validms)
+#     plot_param_fps(presets, fps,  '$p_{reset}$', validms)
 
 
-if analysis == 'scale':
+# if analysis == 'scale':
 
-    scales = [0.25, 0.5,0.75, 1.0, 1.25, 1.5]  # 0.99,0.95, 0.9,0.8,0.7, 0.5, 0.25, 0.1
-    fps = np.zeros([len(scales),seeds, len(contexts), 3])
-    validms = np.zeros(len(scales), dtype=int)
+#     scales = [0.25, 0.5,0.75, 1.0, 1.25, 1.5]  # 0.99,0.95, 0.9,0.8,0.7, 0.5, 0.25, 0.1
+#     fps = np.zeros([len(scales),seeds, len(contexts), 3])
+#     validms = np.zeros(len(scales), dtype=int)
 
-    for g, scale in enumerate(scales):
+#     for g, scale in enumerate(scales):
         
-        file_names = data_dir+f"*_V3_0.95g_0.0rm_100bz_0.0td_{scale}tds_Nonelb_Noneup_64n_50000e_10md_5.0rz_*s.pth" 
-        model_paths = glob.glob(file_names)
-        validms[g] = len(model_paths)
-        print(scale, validms[g])
+#         file_names = data_dir+f"*_V3_0.95g_0.0rm_100bz_0.0td_{scale}tds_Nonelb_Noneup_64n_50000e_10md_5.0rz_*s.pth" 
+#         model_paths = glob.glob(file_names)
+#         validms[g] = len(model_paths)
+#         print(scale, validms[g])
 
-        for m,model_path in enumerate(model_paths):
+#         for m,model_path in enumerate(model_paths):
                 
-            hidden_states_all, model = get_states_hs(model_path)
-            fps[g, m] = find_fixed_points(model, hidden_states_all)
+#             hidden_states_all, model = get_states_hs(model_path)
+#             fps[g, m] = find_fixed_points(model, hidden_states_all)
 
-        print(scale, np.mean(fps[g,:m],axis=0))
+#         print(scale, np.mean(fps[g,:m],axis=0))
 
-    plot_param_fps(scales, fps,  '$\\beta_{\delta}$', validms)
+#     plot_param_fps(scales, fps,  '$\\beta_{\delta}$', validms)
 
 

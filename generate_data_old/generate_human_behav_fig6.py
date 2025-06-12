@@ -251,5 +251,3 @@ fig.tight_layout()
 fig.savefig(f'./human_analysis/area_bar_{mincutoff}_{maxcutoff}.svg')
 fig.savefig(f'./human_analysis/area_bar_{mincutoff}_{maxcutoff}.png',dpi=300)
 
-
-# %%
